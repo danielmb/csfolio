@@ -38,6 +38,7 @@
     "**/*.js",
     ".next/types/**/*.ts",
     "src/env.mjs",
+    "src/sync.mjs",
     "next.config.js"
   ],
   "exclude": ["node_modules"]

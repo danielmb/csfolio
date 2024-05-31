@@ -1,0 +1,53 @@
+name: Deploy to cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+      STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Install SSH key
+        run: |
+          # allow environment variables to be passed to the remote server
+          echo "Allowing environment variables to be passed to the remote server"
+          echo "AcceptEnv *" | sudo tee -a /etc/ssh/sshd_config
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Connect and deploy using rsync
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" --exclude 'node_modules' --delete . ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}
+
+      - name: Install missing dependencies
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "cd ${{ secrets.REMOTE_TARGET }} && npm install"
+
+      - name: Start the server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "cd ${{ secrets.REMOTE_TARGET }} && pm2 startOrRestart ecosystem.config.json"
+      - name: Remove SSH key
+        if: always()
+        run: rm ~/.ssh/id_rsa
