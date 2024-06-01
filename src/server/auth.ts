@@ -14,6 +14,7 @@ import { SteamProvider, steamProviderId } from "@/providers/SteamProvider";
 import type { NextRequest } from "next/server";
 import steamApi from "@/lib/steam";
 
+console.log(env.NEXTAUTH_URL);
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
