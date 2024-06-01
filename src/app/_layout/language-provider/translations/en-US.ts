@@ -18,6 +18,10 @@ const enUsTranslation = {
   type: "Type",
   addTransaction: "Add Transaction",
   yourFriends: "Your Friends",
+  inventoryValue: "Inventory Value",
+  news: "News",
+  notAuthenticated:
+    "The page you are trying to access is only available to authenticated users. Please {login} to access the page.",
 };
 
 export default enUsTranslation;

@@ -1,4 +1,4 @@
-import { TranslationType } from "./en-US";
+import { type TranslationType } from "./en-US";
 
 const nbNoMessages = {
   welcome: "Velkommen tilbake {name}!",
@@ -16,6 +16,10 @@ const nbNoMessages = {
   logOut: "Logg ut",
   noTransactions: "Ingen transaksjoner",
   yourFriends: "Dine venner",
+  inventoryValue: "Inventarverdi",
+  news: "Nyheter",
+  notAuthenticated:
+    "Siden du prøver å få tilgang til, er bare tilgjengelig for autentiserte brukere. Vennligst {login} for å få tilgang til siden.",
 } as Record<TranslationType, string>;
 
 export default nbNoMessages;
