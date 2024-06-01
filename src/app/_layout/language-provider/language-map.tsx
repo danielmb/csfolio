@@ -6,7 +6,7 @@ export const languageMap = {
   // "en-GB": "English UK",
   // hi: "Hindi",
   // ja: "Japanese",
-  "nb-NO": "Norwegian",
+  "nb-NO": "Norsk",
 };
 
 export const messagesMap = {
