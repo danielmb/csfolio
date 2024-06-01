@@ -21,6 +21,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Make sure pnpm is installed
+        continue-on-error: true
+        run: npm install -g pnpm@9.0.6
 
       - name: Install dependencies
         run: npm install
