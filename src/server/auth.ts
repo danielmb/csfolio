@@ -14,7 +14,18 @@ import { SteamProvider, steamProviderId } from "@/providers/SteamProvider";
 import type { NextRequest } from "next/server";
 import steamApi from "@/lib/steam";
 
-console.log(`${env.NEXTAUTH_URL}/api/auth/callback`);
+const urlIfiy = (url: string) => {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  if (url.startsWith("localhost")) {
+    return `http://${url}`;
+  }
+  return `https://${url}`;
+};
+
+const nextAuthUrl = urlIfiy(env.NEXTAUTH_URL);
+
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -92,7 +103,8 @@ export const authOptionsWithRequest = (req?: NextRequest): NextAuthOptions => ({
     ),
     SteamProvider(
       {
-        nextAuthUrl: `${env.NEXTAUTH_URL}/api/auth/callback`,
+        // nextAuthUrl: `${env.NEXTAUTH_URL}/api/auth/callback`,
+        nextAuthUrl: `${nextAuthUrl}/api/auth/callback`,
         steamApiKey: env.STEAM_API_KEY,
       },
       req,
