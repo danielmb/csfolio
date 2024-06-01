@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FormattedDate, FormattedMessage } from "react-intl";
+import { FormattedDate, FormattedMessage, FormattedNumber } from "react-intl";
 import { api } from "@/trpc/server";
 import { cn } from "@/lib/utils";
 import { getServerAuthSession } from "@/server/auth";
@@ -66,7 +66,10 @@ export const Transactions = async () => {
             </TableCell>
             <TableCell className="text-left">{transaction.name}</TableCell>
 
-            <TableCell className="text-left">{transaction.price}</TableCell>
+            {/* <TableCell className="text-left">{transaction.price}</TableCell> */}
+            <TableCell className="text-left">
+              <FormattedNumber value={transaction.price} style="currency" />
+            </TableCell>
             <TableCell
               className={cn(
                 "text-left",

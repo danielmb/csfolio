@@ -65,13 +65,21 @@ export default async function Home() {
           <Transactions />
           <TransactionAddForm />
         </div>
-        <div>
+        <div className="justify-center space-y-4 rounded-2xl border p-2 pt-4 text-center">
+          {/* <p>Inventory Value</p> */}
+          <h1 className="items-center text-center align-middle text-2xl font-bold">
+            <FormattedMessage
+              id="inventoryValue"
+              defaultMessage="Inventory Value"
+            />
+          </h1>
           <InventoryValue data={recentTransactions} />
         </div>
         <div className="h-96 w-60  justify-center space-y-4 rounded-2xl border pt-4">
           {/* Title */}
           <h1 className="items-center text-center align-middle text-2xl font-bold">
-            NEWS
+            {/* NEWS */}
+            <FormattedMessage id="news" defaultMessage="News" />
           </h1>
 
           {/* News */}
