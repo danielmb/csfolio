@@ -28,11 +28,18 @@ interface ChartProps {
 }
 
 export const InventoryValue = ({ data }: ChartProps) => {
-  const labels = data.map((d) => d.date);
-  const prices = data.map((d) => d.price);
+  const end = new Date();
+  const start = new Date(end.getFullYear() - 1, end.getMonth(), end.getDate());
+  const labels = new Array(25)
+    .fill(0)
+    .map((_, i) => new Date(start.getTime() + i * 24 * 60 * 60 * 1000));
 
+  const prices = labels.map((date) => {
+    const randomNum = Math.random() * 1000000;
+    return Math.round(randomNum);
+  });
   const chartData = {
-    labels,
+    labels: labels.map((date) => date.toISOString().split("T")[0]),
     datasets: [
       {
         label: "Price",
