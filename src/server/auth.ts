@@ -13,18 +13,7 @@ import { db } from "@/server/db";
 import { SteamProvider, steamProviderId } from "@/providers/SteamProvider";
 import type { NextRequest } from "next/server";
 import steamApi from "@/lib/steam";
-
-const urlIfiy = (url: string) => {
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-  if (url.startsWith("localhost")) {
-    return `http://${url}`;
-  }
-  return `https://${url}`;
-};
-
-const nextAuthUrl = urlIfiy(env.NEXTAUTH_URL);
+import { getBaseUrl } from "@/trpc/lib";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -81,7 +70,7 @@ export const authOptions: NextAuthOptions = {
     //   clientSecret: env.DISCORD_CLIENT_SECRET,
     // }),
     SteamProvider({
-      nextAuthUrl: `${env.NEXTAUTH_URL}/api/auth/callback`,
+      nextAuthUrl: `${getBaseUrl()}/api/auth/callback`,
     }),
     /**
      * ...add more providers here.
@@ -104,7 +93,8 @@ export const authOptionsWithRequest = (req?: NextRequest): NextAuthOptions => ({
     SteamProvider(
       {
         // nextAuthUrl: `${env.NEXTAUTH_URL}/api/auth/callback`,
-        nextAuthUrl: `${nextAuthUrl}/api/auth/callback`,
+        nextAuthUrl: `${getBaseUrl()}/api/auth/callback`,
+
         steamApiKey: env.STEAM_API_KEY,
       },
       req,
