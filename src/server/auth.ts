@@ -70,7 +70,7 @@ export const authOptions: NextAuthOptions = {
     //   clientSecret: env.DISCORD_CLIENT_SECRET,
     // }),
     SteamProvider({
-      nextAuthUrl: `${getBaseUrl()}/api/auth/callback`,
+      nextAuthUrl: `${env.WEB_URL}/api/auth/callback`,
     }),
     /**
      * ...add more providers here.
@@ -93,7 +93,7 @@ export const authOptionsWithRequest = (req?: NextRequest): NextAuthOptions => ({
     SteamProvider(
       {
         // nextAuthUrl: `${env.NEXTAUTH_URL}/api/auth/callback`,
-        nextAuthUrl: `${getBaseUrl()}/api/auth/callback`,
+        nextAuthUrl: `${env.WEB_URL}/api/auth/callback`,
 
         steamApiKey: env.STEAM_API_KEY,
       },
