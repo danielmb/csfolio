@@ -10,7 +10,7 @@ export const env = createEnv({
     DATABASE_URL: z.string(),
     POSTGRES_PRISMA_URL: z.string(),
     POSTGRES_URL_NON_POOLING: z.string(),
-    WEB_URL:z.string()
+    WEB_URL:z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
