@@ -171,6 +171,11 @@ export const userRouter = createTRPCRouter({
         },
         select: {
           notificationId: true,
+          to: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
       await db.notification
@@ -183,7 +188,10 @@ export const userRouter = createTRPCRouter({
       await db.notification.create({
         data: {
           userId: friendRequest.userIdFrom,
-          message: "Your friend request was rejected",
+          message:
+            "Your friend request to " +
+            deletedFriendRequest.to.name +
+            " was rejected",
           link: `/profile/${userId}`,
           type: "FRIEND_REJECTED",
         },
@@ -229,6 +237,14 @@ export const userRouter = createTRPCRouter({
         where: {
           id: friendRequestId,
           userIdTo: userId,
+        },
+        select: {
+          userIdFrom: true,
+          to: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
       if (!friendRequest) {
@@ -285,7 +301,8 @@ export const userRouter = createTRPCRouter({
       await db.notification.create({
         data: {
           userId: friendRequest.userIdFrom,
-          message: "You have a new friend",
+          message:
+            "Your friend request to " + friendRequest.to.name + " was accepted",
           link: `/profile/${userId}`,
           type: "FRIEND_ACCEPTED",
         },

@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import { TRPCReactProvider } from "@/trpc/react";
 import { Providers } from "./providers";
 import { Navbar } from "./_components/navbar";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
   title: "CSFOL.IO",
@@ -30,6 +31,7 @@ export default function RootLayout({
             <Navbar />
             <div className="mx-6 ">{children}</div>
           </TRPCReactProvider>
+          <Toaster />
         </Providers>
         {/* </ErrorBoundary> */}
       </body>

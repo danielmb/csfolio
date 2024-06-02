@@ -4,6 +4,7 @@ import React, { FC } from "react";
 import { api } from "@/trpc/react";
 import { Button } from "@/components/ui/button";
 import LoggedInUserAvatar, { UserAvatar } from "../user-avatar";
+import { useToast } from "../ui/use-toast";
 interface NotificationData {
   id: string;
 }
@@ -13,6 +14,7 @@ interface UserProviderProps extends NotificationData {
   onRejectFriendRequest?: () => void;
   stopPropagation?: boolean;
   showUser?: boolean;
+  onError?: () => void;
 }
 
 const FriendRequestControl: FC<UserProviderProps> = ({
@@ -22,7 +24,10 @@ const FriendRequestControl: FC<UserProviderProps> = ({
   onRejectFriendRequest,
   stopPropagation,
   showUser,
+  onError,
 }) => {
+  const { toast } = useToast();
+
   const { data: friendRequest } = api.user.getFriendRequestById.useQuery({
     id,
   });
@@ -35,6 +40,18 @@ const FriendRequestControl: FC<UserProviderProps> = ({
       onSuccess: () => {
         // updateUser();
         onRemoveFriendRequest?.();
+        toast({
+          title: "Friend request removed",
+          description: "You have removed this friend request",
+        });
+      },
+      onError: () => {
+        onError?.();
+        toast({
+          title: "Failed to remove friend request",
+          description: "Please try again later",
+          variant: "destructive",
+        });
       },
     });
 
@@ -43,6 +60,18 @@ const FriendRequestControl: FC<UserProviderProps> = ({
       onSuccess: () => {
         // updateUser();
         onRejectFriendRequest?.();
+        toast({
+          title: "Friend request rejected",
+          description: "You have rejected this friend request",
+        });
+      },
+      onError: (e) => {
+        onError?.();
+        toast({
+          title: "Failed to reject friend request",
+          description: "Please try again later",
+          variant: "destructive",
+        });
       },
     });
   const { mutate: acceptFriendRequest, status: acceptFriendRequestStatus } =
@@ -50,6 +79,19 @@ const FriendRequestControl: FC<UserProviderProps> = ({
       onSuccess: () => {
         // updateUser();
         onAcceptFriendRequest?.();
+
+        toast({
+          title: "Friend request accepted",
+          description: "You have accepted this friend request",
+        });
+      },
+      onError: () => {
+        onError?.();
+        toast({
+          title: "Failed to accept friend request",
+          description: "Please try again later",
+          variant: "destructive",
+        });
       },
     });
 

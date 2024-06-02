@@ -39,6 +39,7 @@ const User = ({ id }: UserProps) => {
             onRemoveFriendRequest={update}
             onRejectFriendRequest={update}
             onAcceptFriendRequest={update}
+            onError={update}
           />
         )}
         {!friendRequest && !user?.isFriend && <AddFriendButton />}
