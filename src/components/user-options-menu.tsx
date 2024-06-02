@@ -9,10 +9,11 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import UserAvatar from "./user-avatar";
+import LoggedInUserAvatar from "./user-avatar";
 import { type Session } from "next-auth";
 import { redirect } from "next/navigation";
 import { signIn, signOut } from "next-auth/react";
+import { LogInIcon, LogOutIcon } from "lucide-react";
 interface UserOptionsMenuProps {
   session: Session | null;
 }
@@ -22,7 +23,7 @@ export const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({
   return (
     <Popover>
       <PopoverTrigger>
-        <UserAvatar />
+        <LoggedInUserAvatar />
       </PopoverTrigger>
       <PopoverContent>
         <Command>
@@ -42,6 +43,7 @@ export const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({
                     signOut().catch(console.error);
                   }}
                 >
+                  <LogOutIcon />
                   Log out
                 </CommandItem>
               ) : (
@@ -50,6 +52,7 @@ export const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({
                     signIn("steam").catch(console.error);
                   }}
                 >
+                  <LogInIcon />
                   Log in
                 </CommandItem>
               )}

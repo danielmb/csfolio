@@ -106,13 +106,19 @@ export const userRouter = createTRPCRouter({
 
   getFriendRequestById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx: { db }, input }) => {
+    .query(async ({ ctx: { db, session }, input }) => {
       const friendRequest = await db.friendRequest.findUnique({
         where: {
           id: input.id,
         },
       });
-      return friendRequest;
+      if (!friendRequest) {
+        throw new Error("Friend request not found");
+      }
+      return {
+        ...friendRequest,
+        isToMe: friendRequest.userIdTo === session.user.id,
+      };
     }),
   removeFriendRequest: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -174,6 +180,14 @@ export const userRouter = createTRPCRouter({
           },
         })
         .catch(console.error);
+      await db.notification.create({
+        data: {
+          userId: friendRequest.userIdFrom,
+          message: "Your friend request was rejected",
+          link: `/profile/${userId}`,
+          type: "FRIEND_REJECTED",
+        },
+      });
       return true;
     }),
 
@@ -267,6 +281,15 @@ export const userRouter = createTRPCRouter({
           },
         })
         .catch(console.error);
+
+      await db.notification.create({
+        data: {
+          userId: friendRequest.userIdFrom,
+          message: "You have a new friend",
+          link: `/profile/${userId}`,
+          type: "FRIEND_ACCEPTED",
+        },
+      });
       return true;
     }),
 
@@ -316,6 +339,7 @@ export const userRouter = createTRPCRouter({
           userId: friendId,
           message: "You have a new friend request",
           link: `/profile/${loggedInUserId}`,
+          type: "FRIEND_REQUEST",
         },
       });
 

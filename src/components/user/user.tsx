@@ -2,10 +2,10 @@
 
 import React from "react";
 import { type RouterOutputs, api } from "@/trpc/react";
-import AddFriendButton from "@/components/user/add-friend-button";
-import RemoveFriendRequestButton from "./remove-friend-request-button";
-import RemoveFriendButton from "./remove-friend-button";
+import RemoveFriendButton from "./profile/remove-friend-button";
 import { UserProvider } from "./user-provider";
+import FriendRequestControl from "./remove-friend-request-button";
+import AddFriendButton from "./profile/add-friend-button";
 interface UserProps {
   id: string;
 }
@@ -33,7 +33,14 @@ const User = ({ id }: UserProps) => {
         <p>{user?.name}</p>
         <p>{user?.steamId}</p>
         <p>{user?.id}</p>
-        {friendRequest?.id && <RemoveFriendRequestButton />}
+        {friendRequest?.id && (
+          <FriendRequestControl
+            id={friendRequest.id}
+            onRemoveFriendRequest={update}
+            onRejectFriendRequest={update}
+            onAcceptFriendRequest={update}
+          />
+        )}
         {!friendRequest && !user?.isFriend && <AddFriendButton />}
         {user?.isFriend && <RemoveFriendButton />}
       </div>

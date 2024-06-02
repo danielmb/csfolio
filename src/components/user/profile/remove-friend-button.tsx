@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { api } from "@/trpc/react";
-import { useUser } from "./user-provider";
+import { useUser } from "../user-provider";
 
 const RemoveFriendButton = () => {
   const { id: friendId, update: updateUser } = useUser();

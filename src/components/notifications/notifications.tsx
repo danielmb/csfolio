@@ -15,6 +15,8 @@ import {
 } from "../ui/command";
 import { type RouterOutputs, api } from "@/trpc/react";
 import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
+import FriendRequestControl from "../user/remove-friend-request-button";
 
 interface NotificationProps {
   notification: RouterOutputs["notification"]["getNotifications"][number];
@@ -44,7 +46,10 @@ export const NotificationCommandItem: FC<NotificationProps> = ({
 
   return (
     <CommandItem
-      className="flex justify-between"
+      // className="flex justify-between"
+      className={cn("flex  justify-between", {
+        // "bg-gray-200": notification.type === "FRIEND_REJECTED"
+      })}
       key={notification.id}
       onSelect={
         () => (
@@ -58,7 +63,20 @@ export const NotificationCommandItem: FC<NotificationProps> = ({
         // }
       }
     >
-      {notification.message}
+      {notification.type !== "FRIEND_REQUEST" && <>{notification.message}</>}
+      {notification.friendRequest.map((friendRequest) => (
+        <div key={friendRequest.id} className="flex flex-col justify-between">
+          <span>{notification.message}</span>
+          <div key={friendRequest.id} className="flex justify-between">
+            <FriendRequestControl
+              showUser
+              id={friendRequest.id}
+              key={friendRequest.id}
+              stopPropagation
+            />
+          </div>
+        </div>
+      ))}
       <span className="hidden">{notification.id}</span>
       <Button
         disabled={removeNotificationStatus === "pending"}

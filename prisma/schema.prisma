@@ -100,14 +100,23 @@ model FriendRequest {
     userIdTo       String
 }
 
+enum NotificationType {
+    FRIEND_REQUEST
+    FRIEND_ACCEPTED
+    FRIEND_REJECTED
+    FRIEND_REMOVED
+    MESSAGE
+}
+
 model Notification {
-    id        String   @id @default(cuid())
+    id        String            @id @default(cuid())
     userId    String
     message   String
+    type      NotificationType?
     link      String?
-    read      Boolean? @default(false)
-    createdAt DateTime @default(now())
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    read      Boolean?          @default(false)
+    createdAt DateTime          @default(now())
+    user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     friendRequest FriendRequest[]
 }

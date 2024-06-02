@@ -3,7 +3,7 @@
 import React from "react";
 import { api } from "@/trpc/react";
 import { Button } from "@/components/ui/button";
-import { useUser } from "./user-provider";
+import { useUser } from "../user-provider";
 
 const AddFriendButton = () => {
   const { id: userId, update: updateUser } = useUser();
