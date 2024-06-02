@@ -1,10 +1,10 @@
 "use client";
 import {
-  DateFormatType,
-  TimeFormatType,
+  type DateFormatType,
+  type TimeFormatType,
   DateTimeFormats,
 } from "./date-time-formats";
-import { IDateTimeFormatter } from "./date-time-formatter.interface";
+import type { IDateTimeFormatter } from "./date-time-formatter.interface";
 
 export class DateTimeFormatter implements IDateTimeFormatter {
   private language;

@@ -4,6 +4,7 @@ import User from "@/components/user/user";
 
 const Page = async () => {
   const users = await api.user.getAllUsers();
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold capitalize">Users</h1>

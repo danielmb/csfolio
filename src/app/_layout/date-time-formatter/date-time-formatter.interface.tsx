@@ -1,4 +1,4 @@
-import { DateFormatType, TimeFormatType } from "./date-time-formats";
+import type { DateFormatType, TimeFormatType } from "./date-time-formats";
 
 export interface IDateTimeFormatter {
   formatDateTime: (

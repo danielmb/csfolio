@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { env } from "@/env.mjs";
+import { SteamProvider, steamProviderId } from "@/providers/SteamProvider";
+import { db } from "@/server/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import {
   getServerSession,
@@ -8,12 +11,7 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-import { env } from "@/env.mjs";
-import { db } from "@/server/db";
-import { SteamProvider, steamProviderId } from "@/providers/SteamProvider";
 import type { NextRequest } from "next/server";
-import steamApi from "@/lib/steam";
-import { getBaseUrl } from "@/trpc/lib";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

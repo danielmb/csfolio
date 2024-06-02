@@ -1,5 +1,5 @@
 // const { readAndUpload, createSecretUpdater } = require("github-secret-dotenv");
-import { readAndUpload, createSecretUpdater } from "github-secret-dotenv";
+import { createSecretUpdater } from "github-secret-dotenv";
 // const fs = require("fs");
 import fs from "fs";
 // const dotenv = require("dotenv").config({

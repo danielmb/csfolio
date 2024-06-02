@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 import { languageMap, type LocaleType } from "./language-map";
-import { useLocalStorage } from "@uidotdev/usehooks";
 // supportedLocaleOf
 export const LanguageProviderContext = React.createContext<
   [string, (lang: LocaleType) => void, string]

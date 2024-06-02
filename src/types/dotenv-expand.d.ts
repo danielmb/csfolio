@@ -1,4 +1,4 @@
-import { expand, type DotenvExpandOptions } from "dotenv-expand";
+import { type DotenvExpandOptions } from "dotenv-expand";
 // expand is a function
 // we need to extend the paramter type of expand which is a object
 // we need to allow ignoreProcessEnv: boolean in the object

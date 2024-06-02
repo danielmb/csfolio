@@ -15,7 +15,6 @@ import { useSession } from "next-auth/react";
 import { type TranslationType } from "../_layout/language-provider/language-map";
 export const HeaderLink = ({ href, name, intlId }: HeaderLinkProps) => {
   const pathname = usePathname();
-  const { data: session } = useSession();
   return (
     // className="flex w-full items-center justify-center space-x-4 rounded-lg border-x p-2 hover:bg-gray-100 dark:hover:bg-gray-900"
     // <div className="flex w-full items-center justify-center space-x-4 rounded-lg border-x p-2 hover:bg-gray-100 dark:hover:bg-gray-900">

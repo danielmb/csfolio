@@ -1,17 +1,11 @@
 import React from "react";
 // import { DarkModeToggle } from "@/components/dark-mode-toggle";
-import { CogIcon, MoonIcon, SettingsIcon } from "lucide-react";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { HeaderLink } from "./navbar-link";
 import { LanguageSelector } from "@/components/language-selector";
-import { FormattedMessage } from "react-intl";
-import { SignOutLoginButton } from "@/components/signout-login-button";
 import { getServerAuthSession } from "@/server/auth";
 import { UserOptionsMenu } from "@/components/user-options-menu";
-import { TranslationType } from "../_layout/language-provider/language-map";
+import { type TranslationType } from "../_layout/language-provider/language-map";
 import { Notifications } from "@/components/notifications/notifications";
 interface Page {
   name: string;
@@ -58,7 +52,7 @@ export const Navbar = async () => {
             <DarkModeToggle />
             <LanguageSelector />
             {/* <SignOutLoginButton /> */}
-            <Notifications />
+            {session && <Notifications />}
             <UserOptionsMenu session={session} />
           </div>
         </div>

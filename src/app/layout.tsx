@@ -1,5 +1,4 @@
 import "@/styles/globals.css";
-
 import { GeistSans } from "geist/font/sans";
 
 import { TRPCReactProvider } from "@/trpc/react";
@@ -20,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
+        {/* <ErrorBoundary> */}
         <Providers
           attribute="class"
           defaultTheme="system"
@@ -31,6 +31,7 @@ export default function RootLayout({
             <div className="mx-6 ">{children}</div>
           </TRPCReactProvider>
         </Providers>
+        {/* </ErrorBoundary> */}
       </body>
     </html>
   );

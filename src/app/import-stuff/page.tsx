@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { type FC } from "react";
 import steamApi from "@/lib/steam";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
