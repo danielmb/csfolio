@@ -1,15 +1,16 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { languageMap, type LocaleType } from "./language-map";
 import { useLocalStorage } from "@uidotdev/usehooks";
 // supportedLocaleOf
 export const LanguageProviderContext = React.createContext<
-  [string, (lang: LocaleType) => void]
+  [string, (lang: LocaleType) => void, string]
 >([
   "en-US",
   () => {
     void 0;
   },
+  "English US",
 ]);
 
 export const LanguageProvider: React.FunctionComponent<
@@ -32,10 +33,15 @@ export const LanguageProvider: React.FunctionComponent<
   useEffect(() => {
     language && localStorage.setItem("language", language);
   }, [language]);
+
+  const languageName = useMemo(
+    () => languageMap[language ?? "en-US"],
+    [language],
+  );
   console.log("lang", language);
   return (
     <LanguageProviderContext.Provider
-      value={[language ?? "en-US", setLanguage]}
+      value={[language ?? "en-US", setLanguage, languageName]}
     >
       {children}
     </LanguageProviderContext.Provider>

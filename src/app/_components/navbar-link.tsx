@@ -5,7 +5,6 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { TranslationType } from "../_layout/language-provider/translations/en-US";
 import { FormattedMessage } from "react-intl";
 interface HeaderLinkProps {
   href: string;
@@ -13,6 +12,7 @@ interface HeaderLinkProps {
   intlId?: TranslationType | undefined;
 }
 import { useSession } from "next-auth/react";
+import { type TranslationType } from "../_layout/language-provider/language-map";
 export const HeaderLink = ({ href, name, intlId }: HeaderLinkProps) => {
   const pathname = usePathname();
   const { data: session } = useSession();

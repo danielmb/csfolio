@@ -8,8 +8,11 @@ import Link from "next/link";
 import { HeaderLink } from "./navbar-link";
 import { LanguageSelector } from "@/components/language-selector";
 import { FormattedMessage } from "react-intl";
-import { TranslationType } from "../_layout/language-provider/translations/en-US";
 import { SignOutLoginButton } from "@/components/signout-login-button";
+import { getServerAuthSession } from "@/server/auth";
+import { UserOptionsMenu } from "@/components/user-options-menu";
+import { TranslationType } from "../_layout/language-provider/language-map";
+import { Notifications } from "@/components/notifications/notifications";
 interface Page {
   name: string;
   intlId?: TranslationType;
@@ -27,15 +30,17 @@ const pages: Page[] = [
     href: "/settings",
   },
   {
-    name: "???",
-    href: "/idk",
+    name: "Users",
+    intlId: "users" as const,
+    href: "/users",
   },
   {
     name: "???",
-    href: "/idk2",
+    href: "/",
   },
 ];
-export const Navbar = () => {
+export const Navbar = async () => {
+  const session = await getServerAuthSession();
   return (
     <nav className="border-b border-gray-200 bg-white  dark:border-gray-800 dark:bg-black">
       <div className="flex flex-col items-center justify-between  py-2">
@@ -47,13 +52,14 @@ export const Navbar = () => {
               CSFOL.IO
             </a>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-4">
             {/* Make the icons blue on light mode */}
-            <SettingsIcon className="h-6 w-6 text-blue-500 dark:text-blue-300" />
             {/* <MoonIcon className="h-6 w-6 text-blue-500 dark:text-blue-300" /> */}
             <DarkModeToggle />
             <LanguageSelector />
-            <SignOutLoginButton />
+            {/* <SignOutLoginButton /> */}
+            <Notifications />
+            <UserOptionsMenu session={session} />
           </div>
         </div>
 

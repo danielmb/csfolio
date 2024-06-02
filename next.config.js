@@ -9,6 +9,11 @@
 
 /** @type {import("next").NextConfig} */
 const config = {
+  i18n: {
+    locales: ["en-US", "nb-NO"],
+    defaultLocale: "en-US",
+    localeDetection: false,
+  },
   webpack: (config) => {
     config.module.rules.push({
       test: [/node_modules[\\/]react-intl[\\/.].*\.js$/],

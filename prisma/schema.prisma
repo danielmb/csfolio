@@ -71,6 +71,13 @@ model User {
     accounts      Account[]
     sessions      Session[]
     Transactions  Transaction[]
+
+    friends   User[] @relation("Friends")
+    friendsOf User[] @relation("Friends")
+
+    sentFriendRequests     FriendRequest[] @relation("FriendsRequestFrom")
+    receivedFriendRequests FriendRequest[] @relation("FriendsRequestTo")
+    Notifications          Notification[]
 }
 
 model VerificationToken {
@@ -79,4 +86,28 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model FriendRequest {
+    id             String       @id @default(cuid())
+    notificationId String
+    notification   Notification @relation(fields: [notificationId], references: [id])
+    from           User         @relation("FriendsRequestFrom", fields: [userIdFrom], references: [id])
+    to             User         @relation("FriendsRequestTo", fields: [userIdTo], references: [id])
+    accepted       Boolean
+    createdAt      DateTime     @default(now())
+    userIdFrom     String
+    userIdTo       String
+}
+
+model Notification {
+    id        String   @id @default(cuid())
+    userId    String
+    message   String
+    link      String?
+    read      Boolean? @default(false)
+    createdAt DateTime @default(now())
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    friendRequest FriendRequest[]
 }

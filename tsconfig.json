@@ -39,6 +39,8 @@
     ".next/types/**/*.ts",
     "src/env.mjs",
     "src/sync.mjs",
+    "scripts/**/*.mjs",
+    "src/scripts/translationRunner.mjs",
     "next.config.js"
   ],
   "exclude": ["node_modules"]

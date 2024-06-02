@@ -1,0 +1,136 @@
+{
+  "addTransaction": [
+    {
+      "type": 0,
+      "value": "Add Transaction"
+    }
+  ],
+  "buy": [
+    {
+      "type": 0,
+      "value": "Buy"
+    }
+  ],
+  "buySell": [
+    {
+      "type": 0,
+      "value": "Buy/Sell"
+    }
+  ],
+  "currentLiquidInventoryValue": [
+    {
+      "type": 0,
+      "value": "Current Liquid Inventory Value"
+    }
+  ],
+  "dateTime": [
+    {
+      "type": 0,
+      "value": "Date & Time"
+    }
+  ],
+  "description": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "inventoryValue": [
+    {
+      "type": 0,
+      "value": "Inventory Value"
+    }
+  ],
+  "item": [
+    {
+      "type": 0,
+      "value": "Item"
+    }
+  ],
+  "logIn": [
+    {
+      "type": 0,
+      "value": "Log in"
+    }
+  ],
+  "logOut": [
+    {
+      "type": 0,
+      "value": "Log out"
+    }
+  ],
+  "name": [
+    {
+      "type": 0,
+      "value": "Name"
+    }
+  ],
+  "news": [
+    {
+      "type": 0,
+      "value": "News"
+    }
+  ],
+  "noTransactions": [
+    {
+      "type": 0,
+      "value": "No transactions"
+    }
+  ],
+  "notAuthenticated": [
+    {
+      "type": 0,
+      "value": "The page you are trying to access is only available to authenticated users. Please "
+    },
+    {
+      "type": 1,
+      "value": "login"
+    },
+    {
+      "type": 0,
+      "value": " to access the page."
+    }
+  ],
+  "price": [
+    {
+      "type": 0,
+      "value": "Price"
+    }
+  ],
+  "recentPurchasesSales": [
+    {
+      "type": 0,
+      "value": "Recent Purchases/Sales"
+    }
+  ],
+  "sell": [
+    {
+      "type": 0,
+      "value": "Sell"
+    }
+  ],
+  "type": [
+    {
+      "type": 0,
+      "value": "Type"
+    }
+  ],
+  "welcome": [
+    {
+      "type": 0,
+      "value": "Welcome back guest!"
+    }
+  ],
+  "youHaveNoFriends": [
+    {
+      "type": 0,
+      "value": "You have no friends."
+    }
+  ],
+  "yourFriends": [
+    {
+      "type": 0,
+      "value": "Your Friends"
+    }
+  ]
+}

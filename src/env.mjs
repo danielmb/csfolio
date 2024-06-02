@@ -53,7 +53,7 @@ export const env = createEnv({
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     STEAM_API_KEY: process.env.STEAM_API_KEY,
-    WEB_URL: "https://www.danielmb.party/",
+    WEB_URL: process.env.WEB_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

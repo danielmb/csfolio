@@ -4,6 +4,9 @@ import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { steamEmailDomain } from "@/providers/SteamProvider";
 const ImportStuffPage: FC = async () => {
+  if (true === true) {
+    return <div>Not implemented</div>;
+  }
   const session = await getServerAuthSession();
   const steamId = session?.user.steamId;
   if (!steamId) {
