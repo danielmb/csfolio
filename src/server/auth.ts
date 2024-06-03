@@ -19,6 +19,15 @@ import type { NextRequest } from "next/server";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
+
+const getUrl = (req?: NextRequest) => {
+  if (!req) {
+    return env.WEB_URL;
+  }
+  const url = new URL(req.url);
+  return url.origin;
+};
+
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
@@ -91,7 +100,7 @@ export const authOptionsWithRequest = (req?: NextRequest): NextAuthOptions => ({
     SteamProvider(
       {
         // nextAuthUrl: `${env.NEXTAUTH_URL}/api/auth/callback`,
-        nextAuthUrl: `${env.WEB_URL}/api/auth/callback`,
+        nextAuthUrl: `${getUrl(req)}/api/auth/callback`,
 
         steamApiKey: env.STEAM_API_KEY,
       },
