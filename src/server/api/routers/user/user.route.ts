@@ -130,13 +130,24 @@ export const userRouter = createTRPCRouter({
           },
         },
       };
-      await db.user.update({
+      const { name } = await db.user.update({
         where: {
           id: userId,
         },
         data: {
           ...isFriendDisconnect,
           ...isFriendOfDisconnect,
+        },
+        select: {
+          name: true,
+        },
+      });
+      await db.notification.create({
+        data: {
+          userId: friendId,
+          message: `You have been removed by ${name}`,
+          link: `/profile/${userId}`,
+          type: "FRIEND_REMOVED",
         },
       });
       return true;
