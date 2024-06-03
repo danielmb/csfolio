@@ -11,8 +11,9 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
+import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextRequest } from "next/server";
-
+import { compare } from "bcrypt";
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -76,6 +77,52 @@ export const authOptions: NextAuthOptions = {
     //   clientId: env.DISCORD_CLIENT_ID,
     //   clientSecret: env.DISCORD_CLIENT_SECRET,
     // }),
+    CredentialsProvider({
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials, req) => {
+        const user = await db.account.findFirst({
+          where: {
+            providerAccountId: credentials?.username,
+            type: "email",
+          },
+          select: {
+            id: true,
+            password: true,
+            providerAccountId: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        });
+
+        if (!user) {
+          return null;
+        }
+        const password = user.password;
+        if (!password) {
+          return null;
+        }
+
+        console.log(credentials?.password, password);
+        const isValid = await compare(credentials?.password ?? "", password);
+
+        if (!isValid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          email: user.providerAccountId,
+          name: user.user.username,
+        };
+      },
+    }),
     SteamProvider({
       nextAuthUrl: `${env.WEB_URL}/api/auth/callback`,
     }),
