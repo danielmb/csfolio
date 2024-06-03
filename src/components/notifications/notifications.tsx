@@ -59,7 +59,7 @@ export const NotificationCommandItem: FC<NotificationProps> = ({
       // className="flex justify-between"
       className={cn("flex  justify-between", {
         // if focus
-        "animate-pulse border-red-200 bg-gray-100": focus,
+        "animate-pulse": focus,
       })}
       key={notification.id}
       onSelect={

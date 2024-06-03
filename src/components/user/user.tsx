@@ -7,6 +7,7 @@ import { UserProvider } from "./user-provider";
 import FriendRequestControl from "./friend-request-control";
 import AddFriendButton from "./profile/add-friend-button";
 import { Skeleton } from "../ui/skeleton";
+import { useSession } from "next-auth/react";
 interface UserProps {
   id: string;
   initialUser?: RouterOutputs["user"]["getUser"];
@@ -14,18 +15,23 @@ interface UserProps {
 }
 
 const UserInteractions = ({ id }: UserProps) => {
+  const session = useSession();
   const { data: user, isFetching: isUserFetching } = api.user.getUser.useQuery(
     {
       id,
     },
-    {},
+    {
+      enabled: session.data?.user.id === id,
+    },
   );
   const { data: friendRequest, isFetching: isFriendRequestFetching } =
     api.user.getFriendRequest.useQuery(
       {
         userIdTo: id,
       },
-      {},
+      {
+        enabled: session.data?.user.id === id,
+      },
     );
   const utils = api.useUtils();
   const update = () => {
@@ -35,6 +41,10 @@ const UserInteractions = ({ id }: UserProps) => {
       .catch(console.error);
   };
   const isFetching = isUserFetching || isFriendRequestFetching;
+
+  if (session.data?.user.id === id) {
+    return null;
+  }
   return (
     <UserProvider
       id={id}
