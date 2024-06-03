@@ -1,4 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { type Prisma } from "@prisma/client";
 import { z } from "zod";
 
 export const userRouter = createTRPCRouter({
@@ -15,7 +16,8 @@ export const userRouter = createTRPCRouter({
   }),
   getUser: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx: { db }, input }) => {
+    .query(async ({ ctx: { db, session }, input }) => {
+      const userId = session.user.id;
       const user = await db.user.findUnique({
         where: {
           id: input.id,
@@ -27,6 +29,13 @@ export const userRouter = createTRPCRouter({
           steamId: true,
           friends: {
             select: {
+              name: true,
+              id: true,
+            },
+          },
+          friendsOf: {
+            select: {
+              name: true,
               id: true,
             },
           },
@@ -37,12 +46,18 @@ export const userRouter = createTRPCRouter({
       }
       return {
         ...user,
-        isFriend: user.friends.some((friend) => friend.id === input.id),
+        isFriend: user.friends.some((friend) => friend.id === userId),
       };
     }),
 
   getFriends: protectedProcedure
-    .input(z.object({ id: z.string().optional() }).optional())
+    .input(
+      z
+        .object({
+          id: z.string().optional(),
+        })
+        .optional(),
+    )
     .query(async ({ ctx: { db, session }, input }) => {
       const userId = input?.id ?? session.user.id;
       const user = await db.user.findUnique({
@@ -76,6 +91,11 @@ export const userRouter = createTRPCRouter({
           id: userId,
         },
         select: {
+          friendsOf: {
+            select: {
+              id: true,
+            },
+          },
           friends: {
             select: {
               id: true,
@@ -86,19 +106,37 @@ export const userRouter = createTRPCRouter({
       if (!user) {
         throw new Error("User not found");
       }
-      if (!user.friends.some((friend) => friend.id === friendId)) {
+      const isFriendOf = user.friendsOf.some(
+        (friend) => friend.id === friendId,
+      );
+      const isFriend = user.friends.some((friend) => friend.id === friendId);
+      // if (!user.friends.some((friend) => friend.id === friendId)) {
+      //   throw new Error("Friend not found");
+      // }
+      if (!isFriend && !isFriendOf) {
         throw new Error("Friend not found");
       }
+      const isFriendDisconnect: Prisma.UserUpdateArgs["data"] = {
+        friends: {
+          disconnect: {
+            id: friendId,
+          },
+        },
+      };
+      const isFriendOfDisconnect: Prisma.UserUpdateArgs["data"] = {
+        friendsOf: {
+          disconnect: {
+            id: friendId,
+          },
+        },
+      };
       await db.user.update({
         where: {
           id: userId,
         },
         data: {
-          friends: {
-            disconnect: {
-              id: friendId,
-            },
-          },
+          ...isFriendDisconnect,
+          ...isFriendOfDisconnect,
         },
       });
       return true;

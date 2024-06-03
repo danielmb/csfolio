@@ -16,7 +16,7 @@ import {
 import { type RouterOutputs, api } from "@/trpc/react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import FriendRequestControl from "../user/remove-friend-request-button";
+import FriendRequestControl from "../user/friend-request-control";
 import { useToast } from "../ui/use-toast";
 import Link from "next/link";
 import {
@@ -24,12 +24,15 @@ import {
   FormattedDateTimeRange,
   FormattedRelativeTime,
 } from "react-intl";
+import FriendRequestControlWithUser from "../user/friend-request-control-with-user";
 
 interface NotificationProps {
   notification: RouterOutputs["notification"]["getNotifications"][number];
+  focus?: boolean;
 }
 export const NotificationCommandItem: FC<NotificationProps> = ({
   notification,
+  focus = false,
 }) => {
   const { mutate: markAsRead, status: markAsReadStatus } =
     api.notification.readNotification.useMutation({
@@ -55,7 +58,8 @@ export const NotificationCommandItem: FC<NotificationProps> = ({
     <CommandItem
       // className="flex justify-between"
       className={cn("flex  justify-between", {
-        // "bg-gray-200": notification.type === "FRIEND_REJECTED"
+        // if focus
+        "animate-pulse border-red-200 bg-gray-100": focus,
       })}
       key={notification.id}
       onSelect={
@@ -70,21 +74,23 @@ export const NotificationCommandItem: FC<NotificationProps> = ({
         // }
       }
     >
-      {notification.type !== "FRIEND_REQUEST" && <>{notification.message}</>}
-      {notification.friendRequest.map((friendRequest) => (
-        <div key={friendRequest.id} className="flex flex-col justify-between">
-          <span>{notification.message}</span>
-          <div key={friendRequest.id} className="flex justify-between">
-            <FriendRequestControl
-              showUser
-              id={friendRequest.id}
-              key={friendRequest.id}
-              stopPropagation
-            />
+      <div className="flex flex-col space-y-2">
+        {notification.type !== "FRIEND_REQUEST" && <>{notification.message}</>}
+        {notification.friendRequest.map((friendRequest) => (
+          <div key={friendRequest.id} className="flex flex-col justify-between">
+            <span>{notification.message}</span>
+            <div key={friendRequest.id} className="flex justify-between">
+              <FriendRequestControlWithUser
+                id={friendRequest.id}
+                key={friendRequest.id}
+                stopPropagation
+              />
+            </div>
           </div>
-        </div>
-      ))}
-      <span className="hidden">{notification.id}</span>
+        ))}
+        <span className="hidden">{notification.id}</span>
+        <span>{!notification.read && "Unread"}</span>
+      </div>
       <div className="flex flex-col space-x-2">
         <Button
           disabled={removeNotificationStatus === "pending"}
@@ -98,24 +104,33 @@ export const NotificationCommandItem: FC<NotificationProps> = ({
           <Trash className="h-4 w-4" />
         </Button>
         {/* <time dateTime={notification.createdAt}>
-          <FormattedDate value={notification.createdAt} />
+          <FormattedDate value={notification.createdAt} />http://localhost:3000/profile/clwxp3kmr0000tfzzdkpwmy71
         </time> */}
-        <FormattedRelativeTime
-          numeric="auto"
-          updateIntervalInSeconds={5}
-          value={
-            // new Date(notification.createdAt).getTime() - new Date().getTime()
-            (new Date(notification.createdAt).getTime() -
-              new Date().getTime()) /
-            1000
-          }
-        />
+        <time
+          dateTime={notification.createdAt.toString()}
+          className="text-center text-xs"
+        >
+          <FormattedRelativeTime
+            numeric="auto"
+            updateIntervalInSeconds={5}
+            value={
+              // new Date(notification.createdAt).getTime() - new Date().getTime()
+              (new Date(notification.createdAt).getTime() -
+                new Date().getTime()) /
+              1000
+            }
+          />
+        </time>
       </div>
     </CommandItem>
   );
 };
 
 export const Notifications = () => {
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [focusNotification, setFocusNotification] = useState<string | null>(
+    null,
+  );
   const { toast } = useToast();
   const [previousNotifications, setPreviousNotifications] =
     useState<RouterOutputs["notification"]["getNotifications"]>();
@@ -139,7 +154,15 @@ export const Notifications = () => {
     () => notifications?.filter((n) => n.read) ?? [],
     [notifications],
   );
-
+  useEffect(() => {
+    // remove focus after 5 seconds
+    if (focusNotification) {
+      const timeout = setTimeout(() => {
+        setFocusNotification(null);
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [focusNotification]);
   useEffect(() => {
     // if (previousNotifications.length < unreadNotifications.length) {
     //   const newNotification = unreadNotifications[0];
@@ -164,7 +187,19 @@ export const Notifications = () => {
         title: notification.message,
         description: "New notification",
         action: notification?.link ? (
-          <Link href={notification.link}>View</Link>
+          <div className="flex flex-col space-y-2">
+            <Button
+              onClick={() => (
+                setNotificationsOpen(true),
+                setFocusNotification(notification.id)
+              )}
+            >
+              Open notifications
+            </Button>
+            <Link href={notification.link}>
+              <Button>View</Button>
+            </Link>
+          </div>
         ) : undefined,
       });
     }
@@ -178,7 +213,14 @@ export const Notifications = () => {
   }, [notifications, previousNotifications, toast]);
 
   return (
-    <Popover onOpenChange={(open) => open && updateNotifications()}>
+    // <Popover onOpenChange={(open) => open && updateNotifications()}>
+    <Popover
+      onOpenChange={(open) => {
+        open && updateNotifications().catch(console.error);
+        setNotificationsOpen(open);
+      }}
+      open={notificationsOpen}
+    >
       <PopoverTrigger>
         <div className="relative">
           <BellIcon className="h-6 w-6" />
@@ -199,6 +241,7 @@ export const Notifications = () => {
               <NotificationCommandItem
                 key={notification.id}
                 notification={notification}
+                focus={focusNotification === notification.id}
               />
             ))}
             {(notifications?.length ?? 0) > 0 && <CommandSeparator />}

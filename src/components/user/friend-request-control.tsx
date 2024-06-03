@@ -1,29 +1,29 @@
 "use client";
 
-import React, { FC } from "react";
-import { api } from "@/trpc/react";
+import React, { type FC } from "react";
+import { RouterOutputs, api } from "@/trpc/react";
 import { Button } from "@/components/ui/button";
-import LoggedInUserAvatar, { UserAvatar } from "../user-avatar";
 import { useToast } from "../ui/use-toast";
+import { UserAvatar } from "../user-avatar";
 interface NotificationData {
   id: string;
 }
-interface UserProviderProps extends NotificationData {
+export interface FriendRequestControlProps extends NotificationData {
   onRemoveFriendRequest?: () => void;
   onAcceptFriendRequest?: () => void;
   onRejectFriendRequest?: () => void;
   stopPropagation?: boolean;
-  showUser?: boolean;
+  user?: RouterOutputs["user"]["getUser"];
   onError?: () => void;
 }
 
-const FriendRequestControl: FC<UserProviderProps> = ({
+const FriendRequestControl: FC<FriendRequestControlProps> = ({
   id,
   onRemoveFriendRequest,
   onAcceptFriendRequest,
   onRejectFriendRequest,
   stopPropagation,
-  showUser,
+  user,
   onError,
 }) => {
   const { toast } = useToast();
@@ -31,10 +31,11 @@ const FriendRequestControl: FC<UserProviderProps> = ({
   const { data: friendRequest } = api.user.getFriendRequestById.useQuery({
     id,
   });
-  const { data: user } = api.user.getUser.useQuery(
-    { id: friendRequest?.userIdFrom ?? "" },
-    { enabled: showUser && !!friendRequest?.userIdFrom },
-  );
+  // const { data: user } = api.user.getUser.useQuery(
+  //   { id: friendRequest?.userIdFrom ?? "" },
+  //   { enabled: showUser && !!friendRequest?.userIdFrom },
+  // );
+  // console.log(user);
   const { mutate: removeFriendRequest, status: removeFriendRequestStatus } =
     api.user.removeFriendRequest.useMutation({
       onSuccess: () => {
@@ -99,10 +100,10 @@ const FriendRequestControl: FC<UserProviderProps> = ({
   if (friendRequest.isToMe) {
     return (
       <div className="flex flex-col items-center space-x-2">
-        {showUser && user && (
-          <div className="flex flex-col items-center justify-between space-x-2 p-2">
-            <UserAvatar userId={user.id} />
-            <p>{user.name}</p>
+        {user && (
+          <div className="center flex flex-col items-center justify-between space-x-2 p-2 text-center">
+            <UserAvatar userId={user.id} width={40} height={40} />
+            <p className="text-sm font-semibold">{user.name}</p>
           </div>
         )}
         <div className="flex space-x-2">

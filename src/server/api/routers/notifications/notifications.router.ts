@@ -9,7 +9,9 @@ export const notificationsRouter = createTRPCRouter({
         where: {
           userId: session.user.id,
         },
-
+        orderBy: {
+          createdAt: "desc",
+        },
         include: {
           friendRequest: {
             select: {
