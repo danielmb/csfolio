@@ -15,23 +15,23 @@ interface UserProps {
 }
 
 const UserInteractions = ({ id }: UserProps) => {
-  const session = useSession();
+  // const session = useSession();
   const { data: user, isFetching: isUserFetching } = api.user.getUser.useQuery(
     {
       id,
     },
-    {
-      enabled: session.data?.user.id === id,
-    },
+    // {
+    //   enabled: session.data?.user.id === id,
+    // },
   );
   const { data: friendRequest, isFetching: isFriendRequestFetching } =
     api.user.getFriendRequest.useQuery(
       {
         userIdTo: id,
       },
-      {
-        enabled: session.data?.user.id === id,
-      },
+      // {
+      //   enabled: session.data?.user.id === id,
+      // },
     );
   const utils = api.useUtils();
   const update = () => {
@@ -42,9 +42,9 @@ const UserInteractions = ({ id }: UserProps) => {
   };
   const isFetching = isUserFetching || isFriendRequestFetching;
 
-  if (session.data?.user.id === id) {
-    return null;
-  }
+  // if (session.data?.user.id === id) {
+  //   return null;
+  // }
   return (
     <UserProvider
       id={id}

@@ -12,7 +12,8 @@ interface UserProps {
   };
 }
 const Page: FC<UserProps> = async ({ params }) => {
-  const userId = params?.id ?? (await getServerAuthSession())?.user.id;
+  const session = await getServerAuthSession();
+  const userId = params?.id ?? session?.user.id;
   if (!userId) {
     return <div>User not found</div>;
   }
@@ -52,7 +53,7 @@ const Page: FC<UserProps> = async ({ params }) => {
             </div>
           </div>
           <div>
-            <UserInteractions id={userId} />
+            {userId !== session?.user.id && <UserInteractions id={userId} />}
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-4">
