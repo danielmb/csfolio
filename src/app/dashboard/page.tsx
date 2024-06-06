@@ -40,6 +40,7 @@ export default async function Home() {
           values={{ name: session.user.name }}
           defaultMessage={`Welcome back guest!`}
         />
+        <p>test</p>
         {session.user.image ? (
           <Image
             src={session.user.image}
