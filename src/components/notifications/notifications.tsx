@@ -186,7 +186,7 @@ export const Notifications = () => {
       toast({
         title: notification.message,
         description: "New notification",
-        action: notification?.link ? (
+        action: (
           <div className="flex flex-col space-y-2">
             <Button
               onClick={() => (
@@ -196,11 +196,13 @@ export const Notifications = () => {
             >
               Open notifications
             </Button>
-            <Link href={notification.link}>
-              <Button>View</Button>
-            </Link>
+            {notification?.link && (
+              <Link href={notification.link}>
+                <Button>View</Button>
+              </Link>
+            )}
           </div>
-        ) : undefined,
+        ),
       });
     }
 
