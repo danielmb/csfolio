@@ -62,11 +62,15 @@ export const NotificationCommandItem: FC<NotificationProps> = ({
         "animate-pulse": focus,
       })}
       key={notification.id}
+      onMouseEnter={() =>
+        !notification.read && markAsRead({ id: notification.id })
+      }
       onSelect={
         () => (
-          markAsRead({
-            id: notification.id,
-          }),
+          !notification.read &&
+            markAsRead({
+              id: notification.id,
+            }),
           notification.link && router.push(notification.link)
         )
         // if(notification.link) {
@@ -163,6 +167,7 @@ export const Notifications = () => {
       return () => clearTimeout(timeout);
     }
   }, [focusNotification]);
+
   useEffect(() => {
     // if (previousNotifications.length < unreadNotifications.length) {
     //   const newNotification = unreadNotifications[0];
