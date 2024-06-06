@@ -13,12 +13,17 @@ export const GET = async (req: NextRequest) => {
       },
     );
   }
+  const minuteAgo = new Date(Date.now() - 1000 * 60);
+
   const users = await db.user.findMany({
     select: {
       id: true,
       Notifications: {
         where: {
           read: false,
+          createdAt: {
+            lte: minuteAgo,
+          },
         },
       },
     },
