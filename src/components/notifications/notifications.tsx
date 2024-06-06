@@ -29,18 +29,17 @@ import FriendRequestControlWithUser from "../user/friend-request-control-with-us
 interface NotificationProps {
   notification: RouterOutputs["notification"]["getNotifications"][number];
   focus?: boolean;
+  updateNotifications?: () => void;
 }
 export const NotificationCommandItem: FC<NotificationProps> = ({
   notification,
   focus = false,
+  updateNotifications,
 }) => {
   const { mutate: markAsRead, status: markAsReadStatus } =
     api.notification.readNotification.useMutation({
       onSuccess: () => {
-        api
-          .useUtils()
-          .notification.getNotifications.invalidate(undefined)
-          .catch(console.error);
+        updateNotifications?.();
       },
     });
   const { mutate: removeNotification, status: removeNotificationStatus } =
@@ -246,6 +245,7 @@ export const Notifications = () => {
             <CommandEmpty>No notifications</CommandEmpty>
             {notifications?.map((notification) => (
               <NotificationCommandItem
+                updateNotifications={updateNotifications}
                 key={notification.id}
                 notification={notification}
                 focus={focusNotification === notification.id}
