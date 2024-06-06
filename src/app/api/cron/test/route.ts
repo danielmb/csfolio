@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
-const GET = async (req: NextRequest) => {
+export const GET = async (req: NextRequest) => {
   if (
     req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`
   ) {
