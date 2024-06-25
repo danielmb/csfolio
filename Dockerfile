@@ -38,6 +38,15 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
+ARG DATABASE_URL
+ENV DATABASE_URL $DATABASE_URL
+
+RUN \
+  if [ -f yarn.lock ]; then yarn prisma:migrate:deploy; \
+  elif [ -f package-lock.json ]; then npm run prisma:migrate:deploy; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run prisma:migrate:deploy; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
