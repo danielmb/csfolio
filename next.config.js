@@ -25,6 +25,7 @@ const config = {
   images: {
     domains: ["avatars.steamstatic.com"],
   },
+  output: "standalone",
 };
 
 // export default config;
