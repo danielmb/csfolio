@@ -78,6 +78,11 @@ model User {
     sentFriendRequests     FriendRequest[] @relation("FriendsRequestFrom")
     receivedFriendRequests FriendRequest[] @relation("FriendsRequestTo")
     Notifications          Notification[]
+
+    conversations Conversation[]
+    messagesSeen  Message[]      @relation("MessagesSeen")
+
+    Message Message[] @relation("SentMessages")
 }
 
 model VerificationToken {
@@ -119,4 +124,26 @@ model Notification {
     user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     friendRequest FriendRequest[]
+}
+
+model Message {
+    id        String   @id @default(cuid())
+    message   String
+    createdAt DateTime @default(now())
+
+    seenBy   User[] @relation("MessagesSeen")
+    senderId String
+    sender   User   @relation("SentMessages", fields: [senderId], references: [id])
+
+    conversation   Conversation @relation(fields: [conversationId], references: [id])
+    conversationId String
+}
+
+model Conversation {
+    id              String    @id @default(cuid())
+    createdAt       DateTime  @default(now())
+    latestMessageAt DateTime  @default(now())
+    messages        Message[]
+
+    participants User[]
 }

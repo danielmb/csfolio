@@ -5,6 +5,13 @@ import Image from "next/image";
 import React, { FC } from "react";
 import Link from "next/link";
 import UserInteractions from "@/components/user/user";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { MenuIcon } from "lucide-react";
 
 interface UserProps {
   params?: {
@@ -52,8 +59,20 @@ const Page: FC<UserProps> = async ({ params }) => {
               </div>
             </div>
           </div>
-          <div>
-            {userId !== session?.user.id && <UserInteractions id={userId} />}
+          <div className="flex flex-row space-x-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button>
+                  <MenuIcon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                {userId !== session?.user.id && (
+                  <UserInteractions id={userId} />
+                )}
+              </PopoverContent>
+            </Popover>
+            {user.isOnline && <p className="text-sm text-green-500">Online</p>}
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-4">

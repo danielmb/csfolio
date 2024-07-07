@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { type Prisma } from "@prisma/client";
 import { z } from "zod";
+import { activeSessions } from "../session/session.router";
 
 export const userRouter = createTRPCRouter({
   getAllUsers: protectedProcedure.query(async ({ ctx: { db } }) => {
@@ -47,6 +48,7 @@ export const userRouter = createTRPCRouter({
       return {
         ...user,
         isFriend: user.friends.some((friend) => friend.id === userId),
+        isOnline: activeSessions.has(user.id),
       };
     }),
 
@@ -78,7 +80,10 @@ export const userRouter = createTRPCRouter({
       if (!user) {
         throw new Error("User not found");
       }
-      return user.friends;
+      return user.friends.map((friend) => ({
+        ...friend,
+        isOnline: activeSessions.has(friend.id),
+      }));
     }),
 
   removeFriend: protectedProcedure

@@ -5,6 +5,7 @@ import { TRPCReactProvider } from "@/trpc/react";
 import { Providers } from "./providers";
 import { Navbar } from "./_components/navbar";
 import { Toaster } from "@/components/ui/toaster";
+import "react-toastify/dist/ReactToastify.css";
 
 export const metadata = {
   title: "CSFOL.IO",

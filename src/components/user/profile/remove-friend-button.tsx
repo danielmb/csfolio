@@ -5,6 +5,7 @@ import { Button } from "../../ui/button";
 import { api } from "@/trpc/react";
 import { useUser } from "../user-provider";
 import { useToast } from "@/components/ui/use-toast";
+import { CommandItem } from "@/components/ui/command";
 
 const RemoveFriendButton = () => {
   const { toast } = useToast();
@@ -28,14 +29,21 @@ const RemoveFriendButton = () => {
     },
   });
   return (
-    <Button
-      mutationStatus={status}
-      onClick={() => {
+    // <Button
+    //   mutationStatus={status}
+    //   onClick={() => {
+    //     removeFriend({ id: friendId });
+    //   }}
+    // >
+    //   Remove friend
+    // </Button>
+    <CommandItem
+      onSelect={() => {
         removeFriend({ id: friendId });
       }}
     >
       Remove friend
-    </Button>
+    </CommandItem>
   );
 };
 

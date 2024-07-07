@@ -8,6 +8,13 @@ import FriendRequestControl from "./friend-request-control";
 import AddFriendButton from "./profile/add-friend-button";
 import { Skeleton } from "../ui/skeleton";
 import { useSession } from "next-auth/react";
+import { DmButton } from "./profile/dm-button";
+import {
+  Command,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "../ui/command";
 interface UserProps {
   id: string;
   initialUser?: RouterOutputs["user"]["getUser"];
@@ -53,8 +60,8 @@ const UserInteractions = ({ id }: UserProps) => {
       update={update}
     >
       <>
-        {isFetching ? (
-          <Skeleton className="h-10 w-28 bg-gray-200 dark:bg-gray-700" />
+        {/* {isFetching ? (
+          <Skeleton className="h-10 w-28  bg-gray-200 dark:bg-gray-700" />
         ) : (
           <>
             {friendRequest?.id && (
@@ -68,8 +75,31 @@ const UserInteractions = ({ id }: UserProps) => {
             )}
             {!friendRequest && !user?.isFriend && <AddFriendButton />}
             {user?.isFriend && <RemoveFriendButton />}
+            <DmButton />
           </>
-        )}
+        )} */}
+        <Command>
+          <CommandList>
+            {isFetching ? (
+              <Skeleton className="h-7 w-full  bg-gray-200 dark:bg-gray-700" />
+            ) : (
+              <>
+                {friendRequest?.id && (
+                  <FriendRequestControl
+                    id={friendRequest.id}
+                    onRemoveFriendRequest={update}
+                    onRejectFriendRequest={update}
+                    onAcceptFriendRequest={update}
+                    onError={update}
+                  />
+                )}
+                {!friendRequest && !user?.isFriend && <AddFriendButton />}
+                {user?.isFriend && <RemoveFriendButton />}
+              </>
+            )}
+            <DmButton />
+          </CommandList>
+        </Command>
       </>
     </UserProvider>
   );

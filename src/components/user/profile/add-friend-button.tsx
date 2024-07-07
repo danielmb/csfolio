@@ -5,6 +5,7 @@ import { api } from "@/trpc/react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "../user-provider";
 import { useToast } from "@/components/ui/use-toast";
+import { CommandItem } from "cmdk";
 
 const AddFriendButton = () => {
   const { toast } = useToast();
@@ -28,15 +29,24 @@ const AddFriendButton = () => {
     },
   });
   return (
-    <Button
+    // <Button
+    //   disabled={status === "pending"}
+    //   mutationStatus={status}
+    //   onClick={() => {
+    //     addFriend({ id: userId });
+    //   }}
+    // >
+    //   Add friend
+    // </Button>
+    <CommandItem
       disabled={status === "pending"}
-      mutationStatus={status}
-      onClick={() => {
+      // mutationStatus={status}
+      onSelect={() => {
         addFriend({ id: userId });
       }}
     >
-      Add friend
-    </Button>
+      Add friend {status === "pending" && " (pending)"}
+    </CommandItem>
   );
 };
 

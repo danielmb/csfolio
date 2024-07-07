@@ -142,8 +142,8 @@ export const Notifications = () => {
     {
       // refetchInterval: 10000,
       // staleTime: 10000,
-      staleTime: 10000,
-      refetchInterval: 5000,
+      // staleTime: 10000,
+      // refetchInterval: 5000,
     },
   );
   const utils = api.useUtils();
