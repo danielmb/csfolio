@@ -4,175 +4,91 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import EventEmitter from "events";
-import type TypedEmitter from "typed-emitter";
 import { observable } from "@trpc/server/observable";
 import { TRPCError } from "@trpc/server";
-import { RouterOutputs } from "@/trpc/react";
-import { randomUUID } from "crypto";
-type DBMessage = RouterOutputs["message"]["messages"]["messages"][number];
-export type MessageEvents = {
-  typing: (userId: string, remove?: boolean) => void;
-  message: (message: DBMessage) => void;
-  userJoined: (userId: string) => void;
-  userLeft: (userId: string) => void;
-};
-export type MessageEventsMap = {
-  typing?: {
-    userId: string;
-    remove?: boolean;
-  };
-  message?: DBMessage;
-  userJoined?: string;
-  userLeft?: string;
-};
+import { RedisStream } from "@/lib/stream";
+import { Prisma } from "@prisma/client";
 
-type ActiveParticipants = Map<string, Set<string>>; // list of active participants in a conversation, also their session ids. So we can track who is in a conversation
-export interface LiveConversationData {
-  // activeParticipants: Set<Set<string>>;
-  activeParticipants: ActiveParticipants;
-  typing: Set<string>;
-}
+export const messageEvent = z.object({
+  type: z.literal("message"),
+  userId: z.string(),
+  messageId: z.string(),
+});
+export type MessageEvent = z.infer<typeof messageEvent>;
+const testEvent = z.object({
+  type: z.literal("test"),
+  message: z.string(),
+});
+export const connectedEvent = z.object({
+  type: z.literal("connected"),
+  userId: z.string(),
+});
+export type ConnectedEvent = z.infer<typeof connectedEvent>;
+export const disconnectedEvent = z.object({
+  type: z.literal("disconnected"),
+  userId: z.string(),
+});
+export type DisconnectedEvent = z.infer<typeof disconnectedEvent>;
+export const conversationEvents = messageEvent
+  .or(testEvent)
+  .or(connectedEvent)
+  .or(disconnectedEvent);
+export type ConversationEvents = z.infer<typeof conversationEvents>;
+export type ConversationEventsType = ConversationEvents["type"];
 
-export interface ConversationDataWithEmitter extends LiveConversationData {
-  emitter: TypedEmitter<MessageEvents>;
-}
-// export const messageEvents = new EventEmitter() as TypedEmitter<MessageEvents>;
-const getConversation = (
-  conversationId: string,
-  userId?: string,
-  uuid?: string,
-) => {
-  const conversation = messageMap.get(conversationId) ?? {
-    activeParticipants: new Map(),
-    typing: new Set(),
-    emitter: new EventEmitter() as TypedEmitter<MessageEvents>,
-  };
-  if (userId && uuid) {
-    const active = conversation.activeParticipants.get(userId) ?? new Set();
-    // if length is 0, it means the user just joined the conversation
-    if (active.size === 0) {
-      conversation.emitter.emit("userJoined", userId);
-    }
-    if (!active.has(uuid)) {
-      active.add(uuid);
-    }
-    conversation.activeParticipants.set(userId, active);
-  }
-  messageMap.set(conversationId, conversation);
-  // if the user just joined the conversation
-
-  return conversation;
-};
-
-export const messageMap = new Map<string, ConversationDataWithEmitter>();
-export const messageRouter = createTRPCRouter({
-  initConversation: protectedProcedure
-    .input(z.string())
-    .subscription(({ input, ctx: { session } }) => {
-      return observable<LiveConversationData>((observer) => {
-        // const emitter = new EventEmitter() as TypedEmitter<MessageEvents>;
-
-        // const data = messageMap.get(input) ?? {
-        //   activeParticipants: new Set(),
-        //   typing: new Set(),
-        //   emitter: new EventEmitter() as TypedEmitter<MessageEvents>,
-        // };
-        // data.activeParticipants.add(session.user.id);
-        // messageMap.set(input, data);
-        const uuid = randomUUID();
-        const data = getConversation(input, session.user.id, uuid);
-        // data.activeParticipants.add(session.user.id);
-
-        data.emitter.on("typing", (userId, remove) => {
-          if (remove) {
-            data.typing.delete(userId);
-            return observer.next({
-              activeParticipants: data.activeParticipants,
-              typing: data.typing,
-            });
-          }
-          data.typing.add(userId);
-          observer.next({
-            activeParticipants: data.activeParticipants,
-            typing: data.typing,
-          });
-          setTimeout(() => {
-            data.typing.delete(userId);
-            observer.next({
-              activeParticipants: data.activeParticipants,
-              typing: data.typing,
-            });
-          }, 10000);
-        });
-        data.emitter.on("userJoined", () => {
-          observer.next({
-            activeParticipants: data.activeParticipants,
-            typing: data.typing,
-          });
-        });
-        data.emitter.on("userLeft", () => {
-          observer.next({
-            activeParticipants: data.activeParticipants,
-            typing: data.typing,
-          });
-        });
-
-        return () => {
-          const data = messageMap.get(input);
-          if (data) {
-            const active = data.activeParticipants.get(session.user.id);
-            if (active) {
-              active.delete(uuid);
-              if (active.size === 0) {
-                data.activeParticipants.delete(session.user.id);
-                data.emitter.emit("userLeft", session.user.id);
-              }
-            }
-            if (data.activeParticipants.size === 0) {
-              messageMap.delete(input);
-            }
-          }
-        };
-      });
+export const messageEventToClient = z.object({
+  type: z.literal("message"),
+  message: z.object({
+    conversationId: z.string(),
+    id: z.string(),
+    message: z.string(),
+    senderId: z.string(),
+    sender: z.object({
+      id: z.string(),
+      name: z.string().nullable(),
+      image: z.string().nullable(),
     }),
-  events: protectedProcedure
-    .input(z.string())
-    .subscription(({ input, ctx: { session } }) => {
-      return observable<MessageEventsMap>((observer) => {
-        // get the emitter
-        const data = getConversation(input);
-        const emitter = data.emitter;
-        emitter.on("typing", (userId, remove) => {
-          observer.next({
-            typing: {
-              userId,
-              remove,
-            },
-          });
-        });
-        emitter.on("message", (message) => {
-          observer.next({
-            message: message,
-          });
-        });
-        return () => {
-          emitter?.removeAllListeners();
-        };
-      });
-    }),
-  sendTyping: protectedProcedure
-    // .input(z.string())
-    .input(
+    seenBy: z.array(
       z.object({
-        conversationId: z.string(),
-        typing: z.boolean().default(false),
+        id: z.string(),
+        name: z.string().nullable(),
+        image: z.string().nullable(),
       }),
-    )
-    .mutation(async ({ ctx: { db, session }, input }) => {
+    ),
+    createdAt: z.string(),
+  }),
+  cursor: z.string().nullish(),
+});
+export const conversationEventsToClient = messageEventToClient;
+export type ConversationEventsToClient = z.infer<
+  typeof conversationEventsToClient
+>;
+export type ConversationEventsToClientType = ConversationEventsToClient["type"];
+
+const messageInclude = {
+  seenBy: {
+    select: {
+      id: true,
+      name: true,
+      image: true,
+    },
+  },
+  sender: {
+    select: {
+      id: true,
+      name: true,
+      image: true,
+    },
+  },
+} as const satisfies Prisma.MessageInclude;
+
+export const messageRouter = createTRPCRouter({
+  joinConversation: protectedProcedure
+    .input(z.string())
+    .subscription(async ({ ctx: { db, session }, input }) => {
       const conversation = await db.conversation.findUnique({
         where: {
-          id: input.conversationId,
+          id: input,
           participants: {
             some: {
               id: session.user.id,
@@ -180,27 +96,85 @@ export const messageRouter = createTRPCRouter({
           },
         },
       });
-
       if (!conversation) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Conversation not found",
         });
       }
-
-      // const data = messageMap.get(input.conversationId);
-      const data = getConversation(input.conversationId);
-      if (!data) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            "Conversation is not initialized, the devil is in the details",
+      return observable<ConversationEventsToClient>((observer) => {
+        const data = new RedisStream().redis;
+        const channelName = `conversation:${input}`;
+        data
+          .subscribe(channelName, (err) => {
+            if (err) {
+              observer.error(err);
+            }
+          })
+          .catch((err) => {
+            observer.error(err);
+          });
+        data.on("connect", () => {
+          // observer.next("connected");
+          // observer.next({
+          //   type: "connected",
+          //   userId: session.user.id,
+          // });
         });
-      }
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        data.on("message", async (channel, message) => {
+          // observer.next(message);
+          // turn message to object
+          let event: ConversationEvents;
+          try {
+            event = conversationEvents.parse(JSON.parse(message));
+          } catch (err) {
+            observer.error(err);
+            return;
+          }
+          // on message
+          if (event.type === "message") {
+            const message = await db.message.findUnique({
+              where: {
+                id: event.messageId,
+              },
+              include: messageInclude,
+            });
+            if (!message) {
+              observer.error(new Error("Message not found"));
+              return;
+            }
+            observer.next({
+              type: "message",
+              message: {
+                conversationId: message.conversationId,
+                id: message.id,
+                message: message.message,
+                senderId: message.senderId,
+                sender: {
+                  id: message.sender.id,
+                  name: message.sender.name,
+                  image: message.sender.image,
+                },
+                seenBy: message.seenBy.map((user) => ({
+                  id: user.id,
+                  name: user.name,
+                  image: user.image,
+                })),
+                createdAt: message.createdAt.toISOString(),
+              },
+            });
+          }
+        });
 
-      data.emitter.emit("typing", session.user.id, !input.typing);
-      return true;
+        return () => {
+          data.quit().catch((err) => {
+            observer.error(err);
+          });
+        };
+      });
     }),
+
   getConversation: protectedProcedure
     .input(z.string())
     .query(async ({ ctx: { db, session }, input }) => {
@@ -237,22 +211,7 @@ export const messageRouter = createTRPCRouter({
         where: {
           conversationId: input.conversationId,
         },
-        include: {
-          seenBy: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-          sender: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
+        include: messageInclude,
         orderBy: {
           createdAt: "desc",
         },
@@ -306,24 +265,27 @@ export const messageRouter = createTRPCRouter({
           message: input.message,
           senderId: session.user.id,
         },
-        include: {
-          seenBy: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-          sender: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
+        include: messageInclude,
       });
-      messageMap.get(input.conversationId)?.emitter.emit("message", message);
+      const redis = new RedisStream().redis;
+      const channelName = `conversation:${input.conversationId}`;
+      await redis
+        .publish(
+          channelName,
+          JSON.stringify({
+            messageId: message.id,
+            userId: session.user.id,
+            type: "message",
+          } satisfies MessageEvent),
+        )
+        .catch((err) => {
+          throw err;
+        })
+        .finally(() => {
+          redis.quit().catch((err) => {
+            throw err;
+          });
+        });
       return message;
     }),
   markAsRead: protectedProcedure

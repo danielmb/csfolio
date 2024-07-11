@@ -1,13 +1,12 @@
-import { RouterInputs, RouterOutputs, api } from "@/trpc/react";
+import { type RouterInputs, type RouterOutputs, api } from "@/trpc/react";
 import React, { useEffect, useMemo } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import { type LiveConversationData } from "@/server/api/routers/message/message.router";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { EyeIcon, Loader, UserIcon } from "lucide-react";
+import { Loader, UserIcon } from "lucide-react";
 import { FormattedDate, FormattedTime } from "react-intl";
 import { useInView } from "react-intersection-observer";
 type MessageContent = RouterOutputs["message"]["messages"]["messages"][number];
@@ -155,30 +154,76 @@ export const Chat = ({ conversationId }: ChatProps) => {
   const { data: sessionData } = useSession();
   const { data: conversationData } =
     api.message.getConversation.useQuery(conversationId);
-  const [conversation, setConversation] =
-    React.useState<LiveConversationData>();
-  api.message.initConversation.useSubscription(conversationId, {
-    onData: (data) => {
-      setConversation(data);
-    },
-  });
-  api.message.events.useSubscription(conversationId, {
+
+  api.message.joinConversation.useSubscription(conversationId, {
     onData: (data) => {
       // console.log(data);
-      if (data.message) {
-        apiUtils.message.messages.invalidate().catch(console.error);
+      console.log(data);
+      if (data.type === "message") {
+        apiUtils.message.messages
+          .cancel()
+          .then(() => {
+            apiUtils.message.messages.setInfiniteData(input, (oldData) => {
+              if (!oldData) {
+                return {
+                  pages: [
+                    {
+                      cursor: data.message.id,
+                      messages: [
+                        {
+                          id: data.message.id,
+                          conversationId: data.message.conversationId,
+                          message: data.message.message,
+                          sender: data.message.sender,
+                          seenBy: data.message.seenBy,
+                          createdAt: new Date(data.message.createdAt),
+                          senderId: data.message.senderId,
+                        },
+                      ],
+                    },
+                  ],
+                  pageParams: [],
+                };
+              }
+              return {
+                // pages: [...oldData.pages],
+                // put it first
+                pages: [
+                  {
+                    cursor: data.message.id,
+                    messages: [
+                      {
+                        id: data.message.id,
+                        conversationId: data.message.conversationId,
+                        message: data.message.message,
+                        sender: data.message.sender,
+                        seenBy: data.message.seenBy,
+                        createdAt: new Date(data.message.createdAt),
+                        senderId: data.message.senderId,
+                      },
+                      // ...oldData.pages[0].messages,
+                    ],
+                  },
+                  ...oldData.pages,
+                ],
+                pageParams: oldData.pageParams,
+              };
+            });
+          })
+          .catch(console.error);
       }
+      return;
     },
   });
-  const typing = useMemo(() => {
-    const typingArray = Array.from(conversation?.typing ?? []);
-    return typingArray
-      .filter((userId) => userId !== sessionData?.user?.id)
-      .map(
-        (userId) =>
-          conversationData?.participants.find((p) => p.id === userId)?.name,
-      );
-  }, [conversation?.typing, conversationData?.participants, sessionData]);
+  // const typing = useMemo(() => {
+  //   const typingArray = Array.from(conversation?.typing ?? []);
+  //   return typingArray
+  //     .filter((userId) => userId !== sessionData?.user?.id)
+  //     .map(
+  //       (userId) =>
+  //         conversationData?.participants.find((p) => p.id === userId)?.name,
+  //     );
+  // }, [conversation?.typing, conversationData?.participants, sessionData]);
   // iniew
   const [ref, inView, entry] = useInView({
     threshold: 0.5,
@@ -241,11 +286,11 @@ export const Chat = ({ conversationId }: ChatProps) => {
           {/* {Array.from(conversation?.typing ?? []).map((userId) => (
           <div key={userId}>{userId} is typing</div>
         ))} */}
-          {typing.length > 0 && (
+          {/* {typing.length > 0 && (
             <div>
               {typing.join(", ")} {typing.length > 1 ? "are" : "is"} typing
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="mt-4">
@@ -256,15 +301,15 @@ export const Chat = ({ conversationId }: ChatProps) => {
         <h2>Participants</h2>
         <ul className="flex flex-col space-y-2">
           {conversationData?.participants.map((participant) => {
-            const isInConversation = conversation?.activeParticipants.has(
-              participant.id,
-            );
+            // const isInConversation = conversation?.activeParticipants.has(
+            //   participant.id,
+            // );
             return (
               <li
                 key={participant.id}
                 className={cn(
                   "flex items-center align-middle",
-                  !isInConversation && "opacity-50",
+                  // !isInConversation && "opacity-50",
                 )}
               >
                 {participant.image ? (
@@ -300,13 +345,13 @@ const NewMessage = ({ conversationId }: NewMessageProps) => {
         inputRef.current?.focus();
       },
     });
-  const { mutate: sendTyping } = api.message.sendTyping.useMutation();
-  React.useEffect(() => {
-    sendTyping({
-      conversationId,
-      typing: message.length > 0,
-    });
-  }, [debouncedMessage]);
+  // const { mutate: sendTyping } = api.message.sendTyping.useMutation();
+  // React.useEffect(() => {
+  //   sendTyping({
+  //     conversationId,
+  //     typing: message.length > 0,
+  //   });
+  // }, [debouncedMessage]);
 
   const sendMessageHandler = async (form: React.FormEvent) => {
     form.preventDefault();

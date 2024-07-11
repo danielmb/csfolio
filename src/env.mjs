@@ -11,6 +11,7 @@ export const env = createEnv({
     POSTGRES_PRISMA_URL: z.string(),
     POSTGRES_URL_NON_POOLING: z.string(),
     WEB_URL: z.string(),
+    UPSTASH_REDIS_URL: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -54,6 +55,7 @@ export const env = createEnv({
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     STEAM_API_KEY: process.env.STEAM_API_KEY,
     WEB_URL: process.env.WEB_URL,
+    UPSTASH_REDIS_URL: process.env.UPSTASH_REDIS_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
