@@ -1,8 +1,10 @@
 "use client";
 import { api } from "@/trpc/react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { TestSubscriptionData } from "@/server/api/routers/test/test.route";
-export default function SubscriptionTestPage() {
+import { Button } from "@/components/ui/button";
+// export default function SubscriptionTest() {
+const SubscriptionTest = () => {
   const [latestUpdate, setLatestUpdate] = React.useState<Date | null>(null);
   const [lastUpdates, setLastUpdates] = React.useState<TestSubscriptionData[]>(
     [],
@@ -41,4 +43,56 @@ export default function SubscriptionTestPage() {
       </ul>
     </div>
   );
-}
+};
+const SubscriptionApiTest = () => {
+  useEffect(() => {
+    const eventSource = new EventSource("/api/stream-test");
+    // eventSource.addEventListener("message", (event) => {
+    //   console.log(event.data);
+    // });
+    eventSource.onmessage = (event) => {
+      console.log(event.data);
+    };
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
+  return (
+    <div>
+      <h1>Subscription API Test</h1>
+      <p>
+        This page demonstrates a subscription to the{" "}
+        <code>/api/stream-test</code> endpoint.
+      </p>
+      <p>
+        The server will send a message every second, and the client will log the
+        message.
+      </p>
+    </div>
+  );
+};
+
+const Page = () => {
+  const [enableSubscription, setEnableSubscription] = useState(false);
+  const [enableApiSubscription, setEnableApiSubscription] = useState(false);
+  return (
+    <div className="p-4">
+      <div className="w-1/2">
+        <Button onClick={() => setEnableSubscription((prev) => !prev)}>
+          {enableSubscription ? "Disable" : "Enable"} tRPC Subscription
+        </Button>
+        {enableSubscription && <SubscriptionTest />}
+      </div>
+      <hr className="my-8" />
+      <div className="w-1/2">
+        <Button onClick={() => setEnableApiSubscription((prev) => !prev)}>
+          {enableApiSubscription ? "Disable" : "Enable"} API Subscription
+        </Button>
+        {enableApiSubscription && <SubscriptionApiTest />}
+      </div>
+    </div>
+  );
+};
+
+export default Page;
