@@ -9,6 +9,7 @@ import Image from "next/image";
 import { Loader, UserIcon } from "lucide-react";
 import { FormattedDate, FormattedTime } from "react-intl";
 import { useInView } from "react-intersection-observer";
+import { useChat } from "@/redis/chat.client";
 type MessageContent = RouterOutputs["message"]["messages"]["messages"][number];
 interface ChatProps {
   conversationId: string;
@@ -155,10 +156,69 @@ export const Chat = ({ conversationId }: ChatProps) => {
   const { data: conversationData } =
     api.message.getConversation.useQuery(conversationId);
 
-  api.message.joinConversation.useSubscription(conversationId, {
-    onData: (data) => {
-      // console.log(data);
-      console.log(data);
+  // api.message.joinConversation.useSubscription(conversationId, {
+  //   onData: (data) => {
+  //     // console.log(data);
+  //     console.log(data);
+  //     if (data.type === "message") {
+  //       apiUtils.message.messages
+  //         .cancel()
+  //         .then(() => {
+  //           apiUtils.message.messages.setInfiniteData(input, (oldData) => {
+  //             if (!oldData) {
+  //               return {
+  //                 pages: [
+  //                   {
+  //                     cursor: data.message.id,
+  //                     messages: [
+  //                       {
+  //                         id: data.message.id,
+  //                         conversationId: data.message.conversationId,
+  //                         message: data.message.message,
+  //                         sender: data.message.sender,
+  //                         seenBy: data.message.seenBy,
+  //                         createdAt: new Date(data.message.createdAt),
+  //                         senderId: data.message.senderId,
+  //                       },
+  //                     ],
+  //                   },
+  //                 ],
+  //                 pageParams: [],
+  //               };
+  //             }
+  //             return {
+  //               // pages: [...oldData.pages],
+  //               // put it first
+  //               pages: [
+  //                 {
+  //                   cursor: data.message.id,
+  //                   messages: [
+  //                     {
+  //                       id: data.message.id,
+  //                       conversationId: data.message.conversationId,
+  //                       message: data.message.message,
+  //                       sender: data.message.sender,
+  //                       seenBy: data.message.seenBy,
+  //                       createdAt: new Date(data.message.createdAt),
+  //                       senderId: data.message.senderId,
+  //                     },
+  //                     // ...oldData.pages[0].messages,
+  //                   ],
+  //                 },
+  //                 ...oldData.pages,
+  //               ],
+  //               pageParams: oldData.pageParams,
+  //             };
+  //           });
+  //         })
+  //         .catch(console.error);
+  //     }
+  //     return;
+  //   },
+  // });
+  useChat({
+    id: conversationId,
+    onMessage: (data) => {
       if (data.type === "message") {
         apiUtils.message.messages
           .cancel()

@@ -8,6 +8,7 @@ import { observable } from "@trpc/server/observable";
 import { TRPCError } from "@trpc/server";
 import { RedisStream } from "@/lib/stream";
 import { Prisma } from "@prisma/client";
+import { ChatServerPublisher } from "@/redis/chat";
 
 export const messageEvent = z.object({
   type: z.literal("message"),
@@ -36,6 +37,9 @@ export const conversationEvents = messageEvent
 export type ConversationEvents = z.infer<typeof conversationEvents>;
 export type ConversationEventsType = ConversationEvents["type"];
 
+export type MessageWithInclude = Prisma.MessageGetPayload<{
+  include: typeof messageInclude;
+}>;
 export const messageEventToClient = z.object({
   type: z.literal("message"),
   message: z.object({
@@ -65,7 +69,7 @@ export type ConversationEventsToClient = z.infer<
 >;
 export type ConversationEventsToClientType = ConversationEventsToClient["type"];
 
-const messageInclude = {
+export const messageInclude = {
   seenBy: {
     select: {
       id: true,
@@ -199,6 +203,21 @@ export const messageRouter = createTRPCRouter({
         },
       });
     }),
+  hasAccessToConversation: protectedProcedure
+    .input(z.string())
+    .query(async ({ ctx: { db, session }, input }) => {
+      const conversation = await db.conversation.findUnique({
+        where: {
+          id: input,
+          participants: {
+            some: {
+              id: session.user.id,
+            },
+          },
+        },
+      });
+      return !!conversation;
+    }),
   messages: protectedProcedure
     .input(
       z.object({
@@ -267,25 +286,26 @@ export const messageRouter = createTRPCRouter({
         },
         include: messageInclude,
       });
-      const redis = new RedisStream().redis;
+      // const redis = new RedisStream().redis;
       const channelName = `conversation:${input.conversationId}`;
-      await redis
-        .publish(
-          channelName,
-          JSON.stringify({
-            messageId: message.id,
-            userId: session.user.id,
-            type: "message",
-          } satisfies MessageEvent),
-        )
-        .catch((err) => {
-          throw err;
-        })
-        .finally(() => {
-          redis.quit().catch((err) => {
-            throw err;
-          });
-        });
+      await new ChatServerPublisher(channelName).sendMessage(message.id);
+      // await redis
+      //   .publish(
+      //     channelName,
+      //     JSON.stringify({
+      //       messageId: message.id,
+      //       userId: session.user.id,
+      //       type: "message",
+      //     } satisfies MessageEvent),
+      //   )
+      //   .catch((err) => {
+      //     throw err;
+      //   })
+      //   .finally(() => {
+      //     redis.quit().catch((err) => {
+      //       throw err;
+      //     });
+      //   });
       return message;
     }),
   markAsRead: protectedProcedure
