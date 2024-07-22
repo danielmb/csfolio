@@ -1,16 +1,16 @@
 import { RedisStream } from "@/lib/stream";
 import SuperJSON from "superjson";
 export const dynamic = "force-dynamic";
-interface MessageEvent {
+export interface MessageEvent {
   type: "message";
   message: string;
   id: number;
 }
-interface JoinEvent {
+export interface JoinEvent {
   type: "join";
   id: number;
 }
-interface LeaveEvent {
+export interface LeaveEvent {
   type: "leave";
   id: number;
 }
