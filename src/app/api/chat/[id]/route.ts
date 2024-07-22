@@ -39,11 +39,11 @@ export async function GET(req: NextRequest, { params: { id } }: ChatParams) {
   }
 
   const encoder = new TextEncoder();
-
+  let stream: ChatServerSubscriber;
   const customReadableStream = new ReadableStream({
     async start(controller) {
       const channel = `conversation:${id}`;
-      const stream = new ChatServerSubscriber(channel);
+      stream = new ChatServerSubscriber(channel);
 
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       stream.onMessage(async (message) => {
@@ -85,6 +85,9 @@ export async function GET(req: NextRequest, { params: { id } }: ChatParams) {
         stream.stream.redis.disconnect();
         controller.close();
       };
+    },
+    cancel() {
+      stream.stream.redis.disconnect();
     },
   });
 
