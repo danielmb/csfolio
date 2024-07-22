@@ -61,4 +61,8 @@ export class ChatServerSubscriber {
       }
     });
   }
+
+  public close() {
+    return this.stream.redis.unsubscribe(this.channel);
+  }
 }
