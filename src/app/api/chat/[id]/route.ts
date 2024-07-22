@@ -88,6 +88,9 @@ export async function GET(req: NextRequest, { params: { id } }: ChatParams) {
     },
     cancel() {
       stream.stream.redis.disconnect();
+      stream.close().catch((err) => {
+        console.error("Failed to close stream", err);
+      });
     },
   });
 
