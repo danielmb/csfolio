@@ -27,7 +27,17 @@ const getQueryClient = () => {
   return (clientQueryClientSingleton ??= createQueryClient());
 };
 
-export const api = createTRPCReact<AppRouter>();
+export const api = createTRPCReact<AppRouter>({
+  overrides: {
+    useMutation: {
+      async onSuccess(opts) {
+        await opts.originalFn();
+
+        await opts.queryClient.invalidateQueries();
+      },
+    },
+  },
+});
 
 /**
  * Inference helper for inputs.
